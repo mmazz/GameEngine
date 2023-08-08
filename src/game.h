@@ -3,6 +3,16 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <fstream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iostream>
+
+
+struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
+struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; } ;
+struct BulletConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L ; float S; };
 
 // Represents the current state of the game
 enum GameState {
@@ -30,6 +40,11 @@ public:
     void ProcessInput(float dt);
     void Update(float dt);
     void Render();
+private:
+    PlayerConfig m_playerConfig;
+    EnemyConfig m_enemyConfig;
+    BulletConfig m_bulletConfig;
+    void LoadConfig();
 };
 
 #endif
