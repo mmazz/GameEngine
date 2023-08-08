@@ -8,7 +8,12 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <glm/glm.hpp>
 
+#include "game_object.h"
+#include "sprite_renderer.h"
+#include "resource_manager.h"
+#include "ball_object.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; } ;
@@ -20,6 +25,10 @@ enum GameState {
     GAME_MENU,
     GAME_WIN
 };
+// Initial size of the player paddle
+const glm::vec2 PLAYER_SIZE(150.0f, 150.0f);
+// Initial velocity of the player paddle
+const float PLAYER_VELOCITY(500.0f);
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
