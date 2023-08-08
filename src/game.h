@@ -14,6 +14,7 @@
 #include "sprite_renderer.h"
 #include "resource_manager.h"
 #include "ball_object.h"
+#include "text_renderer.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; } ;
@@ -40,11 +41,14 @@ public:
     GameState               State;
     bool                    Keys[1024];
     unsigned int            Width, Height;
+    unsigned int Score;
     // constructor/destructor
     Game(unsigned int width, unsigned int height);
     ~Game();
     // initialize game state (load all shaders/textures/levels)
     void Init();
+    void ResetScore();
+    void ResetPlayer();
     // game loop
     void ProcessInput(float dt);
     void Update(float dt);

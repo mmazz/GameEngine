@@ -7,9 +7,9 @@ GameObject      *Player;
 // Initial velocity of the Ball
 const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
 // Radius of the ball object
-const float BALL_RADIUS = 12.5f;
+const float BALL_RADIUS = 45.5f;
 BallObject     *Ball;
-
+TextRenderer  *Text;
 
 Game::Game(unsigned int width, unsigned int height)
     : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
@@ -43,13 +43,36 @@ void Game::Init()
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("player"));
     glm::vec2 ballPos = playerPos + glm::vec2(PLAYER_SIZE.x / 2.0f - BALL_RADIUS,
                                               -BALL_RADIUS * 2.0f);
-    Ball = new BallObject(ballPos, BALL_RADIUS, INITIAL_BALL_VELOCITY,
-        ResourceManager::GetTexture("ball"));
+    Ball = new BallObject(ballPos, BALL_RADIUS, INITIAL_BALL_VELOCITY, ResourceManager::GetTexture("ball"));
+    Text = new TextRenderer(this->Width, this->Height);
+    Text->Load("fonts/ocraext.TTF", 24);
+}
+
+void Game::ResetScore()
+{
+    this->Score= 0;
+}
+
+void Game::ResetPlayer()
+{
+    Player->Position.x = this->Width / 2.0f - PLAYER_SIZE.x / 2.0f;
+    Player->Position.y = this->Height/ 2.0f - PLAYER_SIZE.y / 2.0f;
 }
 
 void Game::Update(float dt)
 {
     Ball->Move(dt, this->Width, this->Height);
+    if (Ball->Position.y >= this->Height) // did ball reach bottom edge?
+    {
+        --this->Score;
+        // did the player lose all his lives? : Game over
+        if (this->Score== 0)
+        {
+            this->ResetScore();
+            this->State = GAME_MENU;
+        }
+        this->ResetPlayer();
+    }
 }
 
 void Game::ProcessInput(float dt)
@@ -78,6 +101,11 @@ void Game::ProcessInput(float dt)
             if (Player->Position.y <= this->Height - Player->Size.y)
                 Player->Position.y += velocity;
         }
+        if (this->Keys[GLFW_MOUSE_BUTTON_LEFT])
+        {
+            if (Player->Position.y <= this->Height - Player->Size.y)
+                Player->Position.y += velocity;
+        }
     }
 }
 
@@ -87,8 +115,9 @@ void Game::Render()
     {
         // draw background
         Renderer->DrawSprite(ResourceManager::GetTexture("background"),
-            glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f
-        );
+            glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f);
+        std::stringstream ss; ss << this->Score;
+        Text->RenderText("Score:" + ss.str(), 5.0f, 5.0f, 1.0f);
     }
     Player->Draw(*Renderer);
     Ball->Draw(*Renderer);

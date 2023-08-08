@@ -1,8 +1,9 @@
 CC = gcc
 CXX = g++
 CFLAGS= -C -Wall -I lib/include
-CXXFLAGS = -g -Wall -Wextra -std=c++2a -Ilib/include
-LDLIBS = -lGL -lGLU -lglfw -lm -lXrandr -lXi -lX11  -lpthread -ldl -lXinerama -lXcursor
+CXXFLAGS = -g -Wall -Wextra -std=c++2a -Ilib/include -I/usr/include/freetype2
+
+LDLIBS = -lGL -lGLU -lglfw -lm -lXrandr -lXi -lX11  -lpthread -ldl -lXinerama -lXcursor -lfreetype
 
 OBJDIR = obj
 SRC = $(wildcard src/*.cpp)
