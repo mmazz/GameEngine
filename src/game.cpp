@@ -5,6 +5,7 @@
 SpriteRenderer  *Renderer;
 GameObject      *Player;
 // Initial velocity of the Ball
+const glm::vec2 INITIAL_BALL_POSITION(50.0f, 50.0f);
 const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
 // Radius of the ball object
 const float BALL_RADIUS = 45.5f;
@@ -21,6 +22,7 @@ Game::~Game()
 {
     delete Renderer;
     delete Player;
+    delete Ball;
 }
 
 void Game::Init()
@@ -39,6 +41,7 @@ void Game::Init()
     // load textures
     ResourceManager::LoadTexture("textures/ryu.png", true, "player");
     ResourceManager::LoadTexture("textures/ball.png", true, "ball");
+    ResourceManager::LoadTexture("textures/power.png", true, "power");
     glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height/ 2.0f - PLAYER_SIZE.y / 2.0f);
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("player"));
     glm::vec2 ballPos = playerPos + glm::vec2(PLAYER_SIZE.x / 2.0f - BALL_RADIUS,
@@ -58,10 +61,15 @@ void Game::ResetPlayer()
     Player->Position.x = this->Width / 2.0f - PLAYER_SIZE.x / 2.0f;
     Player->Position.y = this->Height/ 2.0f - PLAYER_SIZE.y / 2.0f;
 }
-
+void Game::ResetBalls()
+{
+    Ball->Reset(INITIAL_BALL_POSITION,  INITIAL_BALL_VELOCITY);
+}
 void Game::Update(float dt)
 {
     Ball->Move(dt, this->Width, this->Height);
+         // check for collisions
+    this->DoCollisions();
     if (Ball->Position.y >= this->Height) // did ball reach bottom edge?
     {
         --this->Score;
@@ -71,7 +79,6 @@ void Game::Update(float dt)
             this->ResetScore();
             this->State = GAME_MENU;
         }
-        this->ResetPlayer();
     }
 }
 
@@ -103,8 +110,6 @@ void Game::ProcessInput(float dt)
         }
         if (this->Keys[GLFW_MOUSE_BUTTON_LEFT])
         {
-            if (Player->Position.y <= this->Height - Player->Size.y)
-                Player->Position.y += velocity;
         }
     }
 }
@@ -161,3 +166,57 @@ void Game::LoadConfig()
     }
     std::cout << m_playerConfig.S << " " << m_enemyConfig.SMAX << " " << m_bulletConfig.S << std::endl;
 }
+
+
+// collision detection
+bool CheckCollision(GameObject &one, GameObject &two);
+bool CheckCollision(BallObject &one, GameObject &two);
+
+void Game::DoCollisions()
+{
+
+    // check collisions for player pad (unless stuck)
+    bool result = CheckCollision(*Ball, *Player);
+    if (result)
+    {
+
+        this->ResetScore();
+        this->ResetPlayer();
+        this->ResetBalls();
+    }
+}
+
+bool CheckCollision(GameObject &one, GameObject &two) // AABB - AABB collision
+{
+    // collision x-axis?
+    bool collisionX = one.Position.x + one.Size.x >= two.Position.x &&
+        two.Position.x + two.Size.x >= one.Position.x;
+    // collision y-axis?
+    bool collisionY = one.Position.y + one.Size.y >= two.Position.y &&
+        two.Position.y + two.Size.y >= one.Position.y;
+    // collision only if on both axes
+    return collisionX && collisionY;
+}
+
+bool CheckCollision(BallObject &one, GameObject &two)
+{
+    // get center point circle first
+    glm::vec2 center(one.Position + one.Radius);
+    // calculate AABB info (center, half-extents)
+    glm::vec2 aabb_half_extents(two.Size.x / 2.0f, two.Size.y / 2.0f);
+    glm::vec2 aabb_center(two.Position.x + aabb_half_extents.x, two.Position.y + aabb_half_extents.y);
+    // get difference vector between both centers
+    glm::vec2 difference = center - aabb_center;
+    glm::vec2 clamped = glm::clamp(difference, -aabb_half_extents, aabb_half_extents);
+    // now that we know the clamped values, add this to AABB_center and we get the value of box closest to circle
+    glm::vec2 closest = aabb_center + clamped;
+    // now retrieve vector between center circle and closest point AABB and check if length < radius
+    difference = closest - center;
+
+    if (glm::length(difference) < one.Radius) // not <= since in that case a collision also occurs when object one exactly touches object two, which they are at the end of each collision resolution stage.
+        return true;
+    else
+        return false;
+
+}
+

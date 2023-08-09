@@ -10,7 +10,6 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-#include "game_object.h"
 #include "sprite_renderer.h"
 #include "resource_manager.h"
 #include "ball_object.h"
@@ -49,10 +48,12 @@ public:
     void Init();
     void ResetScore();
     void ResetPlayer();
+    void ResetBalls();
     // game loop
     void ProcessInput(float dt);
     void Update(float dt);
     void Render();
+    void DoCollisions();
 private:
     PlayerConfig m_playerConfig;
     EnemyConfig m_enemyConfig;

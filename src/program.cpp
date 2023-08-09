@@ -9,7 +9,8 @@
 // GLFW function declarations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
+static void cursorPositionCallback( GLFWwindow *window, double xpos, double ypos );
+void mouseButtonCallback( GLFWwindow *window, int button, int action, int mods );
 // The Width of the screen
 const unsigned int SCREEN_WIDTH = 800;
 // The height of the screen
@@ -39,7 +40,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    glfwSetCursorPosCallback( window, cursorPositionCallback );
+    glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
     glfwSetKeyCallback(window, key_callback);
+    glfwSetMouseButtonCallback( window, mouseButtonCallback );
+    glfwSetInputMode( window, GLFW_STICKY_MOUSE_BUTTONS, 1 );
+
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // OpenGL configuration
@@ -111,5 +117,28 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
+static void cursorPositionCallback( GLFWwindow *window, double xpos, double ypos )
+{
+    std::cout << xpos << " : " << ypos << std::endl;
+}
 
+
+
+void mouseButtonCallback( GLFWwindow *window, int button, int action, int mods )
+{
+    if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS )
+    {
+        if (action == GLFW_PRESS)
+            MatiDo.Keys[button] = true;
+        else if (action == GLFW_RELEASE)
+            MatiDo.Keys[button] = false;
+    }
+    if ( button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS )
+    {
+        if (action == GLFW_PRESS)
+            MatiDo.Keys[button] = true;
+        else if (action == GLFW_RELEASE)
+            MatiDo.Keys[button] = false;
+    }
+}
 
